@@ -47,13 +47,32 @@ void shiftOut(const int lcd,uint8_t dataPin,uint8_t clockPin,uint8_t bitOrder,ui
     GPIOWrite(clockPin,LOW);
   }
 }
-/*	Tentativa de desenhar Bitmaps*/
-void NOKIABitmap(const int lcd,const uint8_t *logo){
+/*	Tentativa de desenhar Bitmaps  */
+/*void NOKIABitmap(const int lcd,const uint8_t *logo){
 	unsigned int size = sizeof(logo)/sizeof(uint8_t);
 	for(unsigned int cont = 0 ; cont < size ; cont ++){
 		NOKIAWrite(lcd,LCD_D,logo[cont]);
 	}
+}*/
+void NOKIABitmap(const int lcd,uint8_t *logo){
+	uint8_t buffer[LCD_X * LCD_Y / 8] = {0,};
+	for(unsigned int count = 0 ; count < LCD_X * LCD_Y / 8; count++){
+		buffer[count] = logo[count];
+	}
+	//NOKIADisplay();
+	for(unsigned int line = 0 ; line < 6; line++){
+		NOKIAWrite(lcd,LOW,PCD8544_SETYADDR | line)	;
+		
+		NOKIAWrite(lcd,LOW,PCD8544_SETXADDR | 0);
+		for(unsigned int col; col < LCD_X ; col ++){
+			NOKIAWrite(lcd,HIGH,buffer[(LCD_X*line)+col]);
+		}
+	}
+	NOKIAWrite(lcd,LOW,PCD8544_SETYADDR);
 }
+/* 	Tentativa de desenhar Bitmaps	*/
+
+
 void NOKIAWrite(const int lcd, uint8_t dc, uint8_t data){
   GPIOWrite(NOKIA_LCD[lcd].PIN_DC, dc);
   GPIOWrite(NOKIA_LCD[lcd].PIN_SCE, LOW);
