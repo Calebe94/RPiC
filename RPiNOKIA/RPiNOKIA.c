@@ -48,23 +48,18 @@ void shiftOut(const int lcd,uint8_t dataPin,uint8_t clockPin,uint8_t bitOrder,ui
   }
 }
 /*	Tentativa de desenhar Bitmaps  */
-/*void NOKIABitmap(const int lcd,const uint8_t *logo){
-	unsigned int size = sizeof(logo)/sizeof(uint8_t);
-	for(unsigned int cont = 0 ; cont < size ; cont ++){
-		NOKIAWrite(lcd,LCD_D,logo[cont]);
-	}
-}*/
 void NOKIABitmap(const int lcd,uint8_t *logo){
-	uint8_t buffer[LCD_X * LCD_Y / 8] = {0,};
+	uint8_t buffer[LCD_X * LCD_Y / 8] = {0,},lines = 6;
 	for(unsigned int count = 0 ; count < LCD_X * LCD_Y / 8; count++){
 		buffer[count] = logo[count];
 	}
 	//NOKIADisplay();
+	
 	for(unsigned int line = 0 ; line < 6; line++){
 		NOKIAWrite(lcd,LOW,PCD8544_SETYADDR | line)	;
 		
 		NOKIAWrite(lcd,LOW,PCD8544_SETXADDR | 0);
-		for(unsigned int col; col < LCD_X ; col ++){
+		for(unsigned int col=0; col < LCD_X ; col ++){
 			NOKIAWrite(lcd,HIGH,buffer[(LCD_X*line)+col]);
 		}
 	}
@@ -117,21 +112,30 @@ int NOKIAInit(unsigned const int PIN_SCE,unsigned const int PIN_RESET,unsigned c
   NOKIA_LCD[NOKIA_LCDINIT].PIN_SDIN = PIN_SDIN;
   NOKIA_LCD[NOKIA_LCDINIT].PIN_SCLK = PIN_SCLK;
 
-  GPIOExport(NOKIA_LCD[NOKIA_LCDINIT].PIN_SCE);	GPIODirection(NOKIA_LCD[NOKIA_LCDINIT].PIN_SCE,0);
+  GPIOExport(NOKIA_LCD[NOKIA_LCDINIT].PIN_SCE);		GPIODirection(NOKIA_LCD[NOKIA_LCDINIT].PIN_SCE,0);
   GPIOExport(NOKIA_LCD[NOKIA_LCDINIT].PIN_RESET);	GPIODirection(NOKIA_LCD[NOKIA_LCDINIT].PIN_RESET,0);
-  GPIOExport(NOKIA_LCD[NOKIA_LCDINIT].PIN_DC);	GPIODirection(NOKIA_LCD[NOKIA_LCDINIT].PIN_DC,0);
+  GPIOExport(NOKIA_LCD[NOKIA_LCDINIT].PIN_DC);		GPIODirection(NOKIA_LCD[NOKIA_LCDINIT].PIN_DC,0);
   GPIOExport(NOKIA_LCD[NOKIA_LCDINIT].PIN_SDIN);	GPIODirection(NOKIA_LCD[NOKIA_LCDINIT].PIN_SDIN,0);
   GPIOExport(NOKIA_LCD[NOKIA_LCDINIT].PIN_SCLK);	GPIODirection(NOKIA_LCD[NOKIA_LCDINIT].PIN_SCLK,0);
   // Inicialização do Display
+
   GPIOWrite(NOKIA_LCD[NOKIA_LCDINIT].PIN_RESET, LOW);
   GPIOWrite(NOKIA_LCD[NOKIA_LCDINIT].PIN_RESET, HIGH);
+
   NOKIAWrite(NOKIA_LCDINIT, LCD_CMD, 0x21 );  // LCD Extended Commands.
   NOKIAWrite(NOKIA_LCDINIT, LCD_CMD, 0xBf );  // Set LCD Vop (Contrast). //B1
   NOKIAWrite(NOKIA_LCDINIT, LCD_CMD, 0x04 );  // Set Temp coefficent. //0x04
   NOKIAWrite(NOKIA_LCDINIT, LCD_CMD, 0x14 );  // LCD bias mode 1:48. //0x13
   NOKIAWrite(NOKIA_LCDINIT, LCD_CMD, 0x0C );  // LCD in normal mode. 0x0d for inverse
-  NOKIAWrite(NOKIA_LCDINIT, LCD_C, 0x20);
-  NOKIAWrite(NOKIA_LCDINIT, LCD_C, 0x0C);
+  NOKIAWrite(NOKIA_LCDINIT, LCD_C,   0x20);
+  NOKIAWrite(NOKIA_LCDINIT, LCD_C,   0x0C);
+
+  /*NEW PARAMETERS: Draw Bitmap */
+
+  NOKIAWrite(NOKIA_LCDINIT,LOW,PCD8544_FUNCTIONSET    | PCD8544_EXTENDEDINSTRUCTION);
+  NOKIAWrite(NOKIA_LCDINIT,LOW,PCD8544_SETBIAS     	  | 0x4);
+  NOKIAWrite(NOKIA_LCDINIT,LOW,PCD8544_FUNCTIONSET);
+  NOKIAWrite(NOKIA_LCDINIT,LOW,PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYNORMAL);
 }
 
   return NOKIA_LCDINIT;
